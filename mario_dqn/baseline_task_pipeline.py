@@ -32,7 +32,7 @@ mario_dqn_config = dict(
         cuda=True,
         model=dict(
             obs_shape=[1, 84, 84],
-            action_shape=6,
+            action_shape=7,
             encoder_hidden_size_list=[32, 64, 128],
         ),
         nstep=3,
