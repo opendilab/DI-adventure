@@ -20,7 +20,7 @@ from wrapper import MaxAndSkipWrapper, WarpFrameWrapper, ScaledFloatFrameWrapper
 from middleware import online_logger
 
 mario_dqn_config = dict(
-    exp_name='exp\mario_dqn_baseline_try1',
+    exp_name='exp/mario_dqn_baseline_try1',
     env=dict(
         collector_env_num=8,
         evaluator_env_num=8,
