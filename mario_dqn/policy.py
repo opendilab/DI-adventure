@@ -1,5 +1,5 @@
 """
-DQN算法，如果不考虑对算法做改动，可以不管这一个文件
+DQN算法，如果不考虑对算法做改动，可以直接默认使用该文件，不用详细了解代码
 """
 from typing import List, Dict, Any, Union
 from collections import namedtuple

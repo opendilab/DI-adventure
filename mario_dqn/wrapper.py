@@ -6,6 +6,7 @@ from ding.envs.env_wrappers import MaxAndSkipWrapper, WarpFrameWrapper, ScaledFl
 import gym
 import numpy as np
 
+
 class StickyActionWrapper(gym.ActionWrapper):
     """
     Overview:
@@ -16,11 +17,12 @@ class StickyActionWrapper(gym.ActionWrapper):
         - env (:obj:`gym.Env`): the environment to wrap.
         - ``p_sticky``: possibility to select the last action
     """
+
     def __init__(self, env: gym.Env, p_sticky: float):
         super().__init__(env)
         self.p_sticky = p_sticky
         self.last_action = 0
-    
+
     def action(self, action):
         if np.random.random() < self.p_sticky:
             action = self.last_action
@@ -37,9 +39,10 @@ class SparseRewardWrapper(gym.Wrapper):
     Properties:
         - env (:obj:`gym.Env`): the environment to wrap.
     """
+
     def __init__(self, env: gym.Env):
         super().__init__(env)
-    
+
     def step(self, action):
         obs, reward, done, info = self.env.step(action)
         dead = True if reward == -15 else False
@@ -60,9 +63,10 @@ class CoinRewardWrapper(gym.Wrapper):
     Properties:
         - env (:obj:`gym.Env`): the environment to wrap.
     """
+
     def __init__(self, env: gym.Env):
         super().__init__(env)
-    
+
     def step(self, action):
         obs, reward, done, info = self.env.step(action)
         reward += info['coins'] * 10

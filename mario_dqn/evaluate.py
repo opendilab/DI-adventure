@@ -23,7 +23,7 @@ def evaluate(state_dict, seed, video_dir_path, eval_times):
         obs = env.reset()
         eval_reward = 0
         while True:
-            Q = policy.forward({0:obs})
+            Q = policy.forward({0: obs})
             action = Q[0]['action'].item()
             obs, reward, done, info = env.step(action)
             eval_reward += reward
@@ -32,16 +32,15 @@ def evaluate(state_dict, seed, video_dir_path, eval_times):
                 eval_reward_list.append(eval_reward)
                 break
         print('During {}th evaluation, the total reward your mario got is {}'.format(n, eval_reward))
-    print('Eval is over! The performance of your RL policy is {}'.format(sum(eval_reward_list)/len(eval_reward_list)))
+    print('Eval is over! The performance of your RL policy is {}'.format(sum(eval_reward_list) / len(eval_reward_list)))
     print("Your mario video is saved in {}".format(video_dir_path))
     try:
         del env
     except Exception:
         pass
 
+
 if __name__ == "__main__":
     ckpt_path = './eval.pth.tar'
     state_dict = torch.load(ckpt_path, map_location='cpu')
     evaluate(state_dict=state_dict, seed=0, video_dir_path='eval_videos', eval_times=4)
-
-    
