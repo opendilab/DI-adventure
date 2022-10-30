@@ -6,7 +6,7 @@ from ding.config import compile_config
 from ding.framework import task, ding_init
 from ding.framework.context import OnlineRLContext
 from ding.framework.middleware import OffPolicyLearner, StepCollector, interaction_evaluator, data_pusher, \
-    eps_greedy_handler, CkptSaver, nstep_reward_enhancer
+    eps_greedy_handler, CkptSaver, nstep_reward_enhancer, termination_checker
 from ding.utils import set_pkg_seed
 # env import
 import gym_super_mario_bros
@@ -20,7 +20,7 @@ from wrapper import MaxAndSkipWrapper, WarpFrameWrapper, ScaledFloatFrameWrapper
 from middleware import online_logger
 
 mario_dqn_config = dict(
-    exp_name='exp/mario_dqn_baseline_try1',
+    exp_name='exp/mario_dqn_baseline',
     env=dict(
         collector_env_num=8,
         evaluator_env_num=8,
@@ -69,8 +69,8 @@ def wrapped_mario_env():
     )
 
 
-def main():
-    cfg = compile_config(main_config, create_cfg=create_config, auto=True)
+def main(mario_main_config, mario_create_config, seed):
+    cfg = compile_config(cfg=mario_main_config, create_cfg=mario_create_config, auto=True, seed=seed)
     filename = '{}/log.txt'.format(cfg.exp_name)
     logging.getLogger(with_files=[filename]).setLevel(logging.INFO)
     ding_init(cfg)
@@ -97,8 +97,14 @@ def main():
         task.use(OffPolicyLearner(cfg, policy.learn_mode, buffer_))
         task.use(online_logger(record_train_iter=False, train_show_freq=500))
         task.use(CkptSaver(cfg, policy, train_freq=10000))
+        task.use(termination_checker(max_env_step=int(1e7)))
         task.run()
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", "-s", type=int, default=0)
+    args = parser.parse_args()
+    main_config.exp_name += "_seed"+str(args.seed)
+    main(main_config, create_config, seed=args.seed)
