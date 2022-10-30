@@ -44,6 +44,9 @@ pip install gym==0.25.1
 .
 ├── LICENSE
 ├── mario_dqn                               --> 本次大作业相关代码：利用DQN算法训练《超级马里奥兄弟》智能体
+│   ├── assets
+│   │   ├── dqn.png                         --> 流程示意图
+│   │   └── mario.gif                       --> mario游戏gif示意图
 │   ├── baseline_task_pipeline.py           --> 智能体训练入口，包含配置文件以及训练的逻辑
 │   ├── evaluate.py                         --> 智能体评估函数
 │   ├── __init__.py                         
@@ -52,9 +55,6 @@ pip install gym==0.25.1
 │   ├── policy.py                           --> 策略逻辑文件，包含经验收集、智能体评估、模型训练的逻辑
 │   ├── README.md
 │   ├── requirements.txt                    --> 项目依赖目录
-│   ├── src
-│   │   ├── dqn.png                         --> 流程示意图
-│   │   └── mario.gif                       --> mario游戏gif示意图
 │   └── wrapper.py                          --> 各式各样的装饰器实现
 └── README.md
 ```
