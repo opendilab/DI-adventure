@@ -1,4 +1,6 @@
-from cv2 import mean
+"""
+智能体评估函数
+"""
 import torch
 from ding.utils import set_pkg_seed
 from baseline_task_pipeline import main_config, wrapped_mario_env, create_config

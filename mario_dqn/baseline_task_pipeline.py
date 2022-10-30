@@ -1,3 +1,6 @@
+"""
+智能体训练入口，包含配置文件以及训练的逻辑
+"""
 from easydict import EasyDict
 from ditk import logging
 from ding.envs import DingEnvWrapper, SubprocessEnvManagerV2

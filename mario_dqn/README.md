@@ -1,0 +1,65 @@
+# 强化学习大作业代码配置与运行
+## 1. Baseline 代码获取与环境安装
+### 深度学习框架 PyTorch 安装
+这一步有网上有非常多的教程，根据自己的情况安装即可，这里给出一个示例
+> 请安装 1.10.0 版本以避免不必要的环境问题
+```bash
+# 确保您当前是conda环境，且有适合的 GPU 可以使用
+conda install pytorch==1.10.0 torchvision==0.11.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+```
+### opencv-python 安装
+- 在对特征空间的修改中需要对马里奥游戏传回的图像进行处理，代码中使用的是 OpenCV 工具包，安装方法如下
+```bash
+pip install opencv-python
+```
+### Baseline 代码获取
+- 这次课程专门创建了 DI-advanture 仓库作为算法 baseline，推荐通过以下方式获取：
+git clone https://github.com/opendilab/DI-adventure
+如果出现网络问题，也可以直接去到 DI-advanture 的仓库手动下载后解压。这样做的缺陷是需要手动初始化 git 。推荐使用 git 作为代码管理工具，记录每一次的修改，推荐 git 教程。
+DI-engine 环境安装
+### 强化学习库 DI-engine 安装
+- 由于这次大作业的目标不是强化学习算法，因此代码中使用了开源强化学习库 DI-engine 作为具体的强化学习算法实现，安装方法如下：
+```bash
+## 1. 直接通过pip安装
+pip install DI-engine
+## 2. 或者通过 git 安装
+git clone git@github.com:opendilab/DI-engine.git
+cd DI-engine
+pip install -e .
+```
+- 修改 gym 版本
+```bash
+# DI-engine这里可能会将gym版本改为0.25.2，需要手动改回来
+pip install gym==0.25.1
+```
+## 2. Baseline 代码运行
+```bash
+cd DI-adventure/mario_dqn
+# 对于每组实验，推荐设置三个种子（seed）进行实验
+python baseline_task_pipeline.py -s 0
+```
+## 3. 智能体性能评估
+目前有两种方式：
+1. tensorboard 查看训练过程中的曲线
+- 首先安装 tensorboard 工具：
+```bash
+pip install tensorboard
+```
+- 查看训练日志：
+```bash
+tensorboard --logdir mario_dqn/exp
+```
+tensorboard 中指标含义如下
+- basic/eval_episode_reward_mean：平均每局游戏（episode）所能获取的分数随着与环境交互的步数（step）的变化情况，一般1-1关卡接近3000分就是成功通关；
+- basic/exploration_epsilon：DQN在采集数据时，使用的是 $\epsilon$-greedy 算法，$\epsilon$ 随着与环境交互的步数（step）的变化情况，一般会是逐步下降；
+- basic/train_cur_lr：神经网络学习率的变化情况；
+- basic/train_q_value：训练过程中，Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，大趋势会是逐步上升；
+- basic/train_target_q_value：baseline 代码使用了 target-Q network 来稳定训练，这个是 target Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，应该会和 Q-network 的变化趋势接近；
+- basic/train_total_loss：神经网络训练过程中的损失（loss）随着 step 的变化情况；
+
+2. 对智能体性能进行评估，并保存录像：
+```bash
+python evaluate.py
+```
+- 建议对同一模型更换 seed 进行多次测试取均值来确保结果的可行度。
+- 此外该命令还会保存评估时的游戏录像（请确保您的 ffmpeg 软件可用），以供查看。
