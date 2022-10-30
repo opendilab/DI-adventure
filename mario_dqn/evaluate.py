@@ -41,6 +41,14 @@ def evaluate(state_dict, seed, video_dir_path, eval_times):
 
 
 if __name__ == "__main__":
-    ckpt_path = './eval.pth.tar'
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", "-s", type=int, default=0)
+    parser.add_argument("--checkpoint", "-ckpt", type=str, default='./exp/mario_dqn_baseline/ckpt/eval.pth.tar')
+    parser.add_argument("--replay_path", "-rp", type=str, default='./eval_videos')
+    args = parser.parse_args()
+    seed = args.seed
+    ckpt_path = args.checkpoint
+    video_dir_path = args.replay_path
     state_dict = torch.load(ckpt_path, map_location='cpu')
-    evaluate(state_dict=state_dict, seed=0, video_dir_path='eval_videos', eval_times=4)
+    evaluate(state_dict=state_dict, seed=seed, video_dir_path=video_dir_path, eval_times=4)

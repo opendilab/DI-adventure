@@ -2,7 +2,7 @@
 > 同学们不要对于RL背后的数学原理和复杂的代码逻辑感到困扰，首先是本次大作业会很少涉及到这一部分，仓库中对这一部分都有着良好的封装；其次是有问题（原理或者代码实现上的）可以随时提问一起交流，方式包括但不限于：
 > - github issue
 > - 课程微信群
-> - 开发者邮箱
+> - 开发者邮箱: opendilab@pjlab.org.cn
 
 ## 1. Baseline 代码获取与环境安装
 ### 深度学习框架 PyTorch 安装
@@ -54,14 +54,13 @@ pip install gym==0.25.1
 │   ├── requirements.txt                    --> 项目依赖目录
 │   ├── src
 │   │   ├── dqn.png                         --> 流程示意图
-│   │   ├── eval.pth.tar                    --> 用于实例评估的模型文件
 │   │   └── mario.gif                       --> mario游戏gif示意图
 │   └── wrapper.py                          --> 各式各样的装饰器实现
 └── README.md
 ```
 
 - 神经网络结构
-![](src/dqn.png)
+![](assets/dqn.png)
 - 代码运行
 ```bash
 cd DI-adventure/mario_dqn
@@ -87,9 +86,11 @@ tensorboard 中指标含义如下
 - basic/train_target_q_value：baseline 代码使用了 target-Q network 来稳定训练，这个是 target Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，应该会和 Q-network 的变化趋势接近；
 - basic/train_total_loss：神经网络训练过程中的损失（loss）随着 step 的变化情况；
 
+总体而言，目标是在尽可能少的环境交互步数能达到尽可能高的回报。
+
 2. 对智能体性能进行评估，并保存录像：
 ```bash
-python3 -u evaluate.py
+python3 -u evaluate.py -s <SEED> -ckpt <CHECKPOINT_PATH> -rp <REPLAY_PATH>
 ```
 - 建议先一个种子（seed）验证智能体能否正确运行，然后增加到3个种子验证智能体性能的稳定性。
 - 此外该命令还会保存评估时的游戏录像（请确保您的 ffmpeg 软件可用），以供查看。
@@ -97,5 +98,22 @@ python3 -u evaluate.py
 ## 4. 特征处理
 - 包括对于观测空间（observation space）、动作空间（action space）和奖励空间（reward space）的处理；
 - 这一部分主要使用 wrapper 来实现，什么是 wrapper 可以参考：
-1. [如何自定义一个 ENV WRAPPER](https://di-engine-docs.readthedocs.io/zh_CN/latest/04_best_practice/env_wrapper_zh.html)
-2. [Gym Documentation Wrappers](https://www.gymlibrary.dev/api/wrappers/)
+    1. [如何自定义一个 ENV WRAPPER](https://di-engine-docs.readthedocs.io/zh_CN/latest/04_best_practice/env_wrapper_zh.html)
+    2. [Gym Documentation Wrappers](https://www.gymlibrary.dev/api/wrappers/)
+
+可以对以下特征空间更改进行尝试：
+### 观测空间（observation space）
+- 增加图像输入信息密度（将游戏版本从`v0`->`v1`）
+- 堆叠四帧作为输入（`FrameStackWrapper(env, n_frames=4)`即可，注意同时更改config中的`obs_space=[4, 84, 84]`）
+- 图像降采样（尝试游戏版本`v2`、`v3`的效果）
+### 动作空间（action space）
+- 动作简化（将 SIMPLE_ACTION 替换为 `[['right'], ['right', 'A']]`，同时更改 `action_shape=2`） 
+- 增加动作的多样性（将 `SIMPLE_ACTION` 替换为 `COMPLEX_MOVEMENT`，同时更改 `action_shape=12`）
+- 粘性动作 sticky action（给环境添加 `StickyActionWrapper`，方式和其它自带的 wrapper 相同，即`lambda env: StickyActionWrapper(env)`）
+### 奖励空间（reward space）
+- 尝试给予金币奖励（给环境添加 `CoinRewardWrapper`，方式和其它自带的 wrapper 相同）
+- 稀疏 reward，只有死亡和过关才给reward（给环境添加 `SparseRewardWrapper`，方式和其它自带的 wrapper 相同）
+# 更新计划
+- [ ] 提供更多的wrapper以供尝试
+- [ ] 分析范例（Class Activation Mapping + 光流等）
+> 后续更新会在群里进行通知
