@@ -12,7 +12,7 @@
 这一步有网上有非常多的教程，根据自己的情况安装即可，这里给出一个示例
 > 请安装 1.10.0 版本以避免不必要的环境问题
 ```bash
-# 确保您当前是conda环境，且有适合的 GPU 可以使用
+# 确保您当前是conda环境，且有适合的 GPU 以及相应的驱动版本可以使用，没有GPU，程序运行时长是无法接受的。
 conda install pytorch==1.10.0 torchvision==0.11.0 cudatoolkit=11.3 -c pytorch -c conda-forge
 ```
 ### opencv-python 安装
@@ -30,9 +30,9 @@ git clone https://github.com/opendilab/DI-adventure
 - 由于这次大作业的目标不是强化学习算法，因此代码中使用了开源强化学习库 DI-engine 作为具体的强化学习算法实现，安装方法如下：
 ```bash
 ## 1. 直接通过pip安装
-pip install DI-engine
+pip install DI-engine==0.4.4
 ## 2. 或者通过 git 安装
-git clone https://github.com/opendilab/DI-adventure.git
+git clone -b v0.4.4 --depth=1 https://github.com/opendilab/DI-adventure.git
 cd DI-engine
 pip install -e .
 ```
@@ -82,7 +82,7 @@ pip install tensorboard
 tensorboard --logdir <exp_dir> --bind_all
 ```
 tensorboard 中指标含义如下
-- basic/eval_episode_reward_mean：平均每局游戏（episode）所能获取的分数随着与环境交互的步数（step）的变化情况，一般1-1关卡接近3000分就是成功通关；
+- basic/eval_episode_reward_mean：平均每局游戏（episode）所能获取的分数随着与环境交互的步数（step）的变化情况，一般1-1关卡2500分以上就是成功通关；
 - basic/exploration_epsilon：DQN在采集数据时，使用的是 $\epsilon$-greedy 算法，$\epsilon$ 随着与环境交互的步数（step）的变化情况，一般会是逐步下降；
 - basic/train_cur_lr：神经网络学习率的变化情况；
 - basic/train_q_value：训练过程中，Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，大趋势会是逐步上升；
