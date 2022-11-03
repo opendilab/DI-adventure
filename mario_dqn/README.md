@@ -120,3 +120,5 @@ python3 -u evaluate.py -s <SEED> -ckpt <CHECKPOINT_PATH> -rp <REPLAY_PATH>
 - [ ] 提供更多的wrapper以供尝试
 - [ ] 分析范例（Class Activation Mapping + 光流等）
 > 后续更新会在群里进行通知
+# 对于大作业任务书的一些补充说明：
+- “3.2【baseline 跑通】（3）训练出能够通关简单级别关卡（1-1 ~~，1-2~~ ）的智能体”。 考虑到算力等因素，大家只需要关注关卡1-1即可。
