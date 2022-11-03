@@ -36,7 +36,7 @@ mario_dqn_config = dict(
         evaluator_env_num=8,
         # 评估轮次
         n_evaluator_episode=8,
-        # 训练停止的分数（这里设置了一个不可能达到的分数）
+        # 训练停止的分数（这里设置了一个不可能达到的分数
         stop_value=100000,
     ),
     policy=dict(
@@ -112,7 +112,7 @@ def main(mario_main_config, mario_create_config, seed):
         buffer_ = DequeBuffer(size=cfg.policy.other.replay_buffer.replay_buffer_size)
         policy = DQNPolicy(cfg.policy, model=model)
 
-        task.use(interaction_evaluator(cfg, policy.eval_mode, evaluator_env))
+        task.use(interaction_evaluator(cfg, policy.eval_mode, evaluator_env, render=True))
         task.use(eps_greedy_handler(cfg))
         task.use(StepCollector(cfg, policy.collect_mode, collector_env))
         task.use(nstep_reward_enhancer(cfg))

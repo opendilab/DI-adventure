@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Callable
 import numpy as np
 from ding.utils import DistributedWriter
 if TYPE_CHECKING:
-    from ding.framework import OnlineRLContext, OfflineRLContext
+    from ding.framework import OnlineRLContext
 
 
 def online_logger(record_train_iter: bool = False, train_show_freq: int = 100) -> Callable:
@@ -32,6 +32,8 @@ def online_logger(record_train_iter: bool = False, train_show_freq: int = 100) -
                     ctx.env_step
                 )
                 writer.add_scalar('basic/exploration_epsilon', ctx.collect_kwargs['eps'], ctx.env_step)
+            writer.add_video('eval_replay_videos', ctx.eval_output['replay_video'], ctx.env_step, 30)
+            writer.flush()
         if ctx.train_output is not None and ctx.train_iter - last_train_show_iter >= train_show_freq:
             last_train_show_iter = ctx.train_iter
             output = ctx.train_output.pop()
