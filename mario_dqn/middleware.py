@@ -13,12 +13,24 @@ def online_logger(record_train_iter: bool = False, train_show_freq: int = 100) -
         nonlocal last_train_show_iter
         if not np.isinf(ctx.eval_value):
             if record_train_iter:
-                writer.add_scalar('basic/eval_episode_reward_mean-env_step', ctx.eval_value, ctx.env_step)
-                writer.add_scalar('basic/eval_episode_reward_mean-train_iter', ctx.eval_value, ctx.train_iter)
+                writer.add_scalar('basic/eval_episode_return_mean-env_step', ctx.eval_value, ctx.env_step)
+                writer.add_scalar('basic/eval_episode_return_mean-train_iter', ctx.eval_value, ctx.train_iter)
+                writer.add_scalar(
+                    'basic/eval_episode_discount_return_mean-env_step',
+                    ctx.eval_output['episode_info']['discount_return_mean'], ctx.env_step
+                )
+                writer.add_scalar(
+                    'basic/eval_episode_discount_return_mean-train_iter',
+                    ctx.eval_output['episode_info']['discount_return_mean'], ctx.train_iter
+                )
                 writer.add_scalar('basic/exploration_epsilon-env_step', ctx.collect_kwargs['eps'], ctx.env_step)
                 writer.add_scalar('basic/exploration_epsilon-train_iter', ctx.collect_kwargs['eps'], ctx.train_iter)
             else:
-                writer.add_scalar('basic/eval_episode_reward_mean', ctx.eval_value, ctx.env_step)
+                writer.add_scalar('basic/eval_episode_return_mean', ctx.eval_value, ctx.env_step)
+                writer.add_scalar(
+                    'basic/eval_episode_discount_return_mean', ctx.eval_output['episode_info']['discount_return_mean'],
+                    ctx.env_step
+                )
                 writer.add_scalar('basic/exploration_epsilon', ctx.collect_kwargs['eps'], ctx.env_step)
         if ctx.train_output is not None and ctx.train_iter - last_train_show_iter >= train_show_freq:
             last_train_show_iter = ctx.train_iter
