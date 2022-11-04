@@ -36,19 +36,23 @@ git remote set-url origin https://github.com/opendilab/DI-adventure.git
 ### 强化学习库 DI-engine 安装
 - 由于这次大作业的目标不是强化学习算法，因此代码中使用了开源强化学习库 DI-engine 作为具体的强化学习算法实现，安装方法如下：
 ```bash
-git clone -b dev-eval-vlz --depth=1 https://github.com/opendilab/DI-engine.git
+# clone主分支到本地
+git clone https://github.com/opendilab/DI-engine.git
 cd DI-engine
+# 查看远程分支
+git branch -a
+# 使用 7f8c53ec6c0f3b7552cc144803422ca96d8da36e 的commit id。
+git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
 pip install -e .
 ```
 - (OPTIONAL)由于DI-adventure在不断更新，如果您目前使用的是老版本的DI-adventure，可能需要通过以下方式同步更新：
 ```bash
-# 1. 请确保自己安装的是dev-eval-vlz分支的DI-engine，最简单的方法就是重新安装DI-engine
-git clone -b dev-eval-vlz --depth=1 https://github.com/opendilab/DI-adventure.git
+# 1. 切换到正确的DI-engine版本：
 cd DI-engine
-pip install -e .
+git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
 # 2. 更新DI-adventure
 cd DI-adventure
-# 确认'orgin'指向远端仓库‘git@github.com:opendilab/DI-adventure.git’
+# 确认'origin'指向远端仓库‘git@github.com:opendilab/DI-adventure.git’
 git remote -v
 # 以下这步如果出现各种例如merge conflict问题，可以借助互联网或咨询助教帮助解决。
 # 或者直接重新安装DI-adventure，注意保存自己的更改。
