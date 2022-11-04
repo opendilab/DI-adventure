@@ -63,6 +63,10 @@ git pull origin main
 # DI-engine这里可能会将gym版本改为0.25.2，需要手动改回来
 pip install gym==0.25.1
 ```
+- 安装moviepy以在tensorboard中保存GIF图像
+```bash
+pip install moviepy
+```
 ## 2. Baseline 代码运行
 - 项目结构
 ```bash
