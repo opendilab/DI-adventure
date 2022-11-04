@@ -5,11 +5,14 @@
 > - 开发者邮箱: opendilab@pjlab.org.cn
 
 ## 1. Baseline 代码获取与环境安装
+> mario环境的安装教程在网络学堂上，可以自行取用，需要注意：
+> 1. 请选择3.8版本的python以避免不必要的版本问题；
+> 2. 通过键盘与环境交互需要有可以用于渲染的显示设备，大部分服务器不能胜任，可以选择本地设备或者暂时跳过这一步，对后面没有影响；
 ### 深度学习框架 PyTorch 安装
 这一步有网上有非常多的教程，根据自己的情况安装即可，这里给出一个示例
 > 请安装 1.10.0 版本以避免不必要的环境问题
 ```bash
-# 确保您当前是conda环境，且有适合的 GPU 可以使用
+# 确保您当前是conda环境，且有适合的 GPU 以及相应的驱动版本可以使用，没有GPU，程序运行时长是无法接受的。
 conda install pytorch==1.10.0 torchvision==0.11.0 cudatoolkit=11.3 -c pytorch -c conda-forge
 ```
 ### opencv-python 安装
@@ -22,16 +25,38 @@ pip install opencv-python
 ```bash
 git clone https://github.com/opendilab/DI-adventure
 ```
-如果出现网络问题，也可以直接去到 DI-advanture 的仓库手动下载后解压。这样做的缺陷是需要手动初始化 git 。推荐使用 git 作为代码管理工具，记录每一次的修改，推荐 [git 教程](https://www.liaoxuefeng.com/wiki/896043488029600)。
+如果出现网络问题，也可以直接去到 DI-advanture 的仓库手动下载后解压。这样做的缺陷是需要手动初始化 git 与设置远端仓库地址：
+```bash
+# 如果您是通过手动解压的方式才需要执行以下内容
+git init
+git add * && git commit -m 'init repo'
+git remote set-url origin https://github.com/opendilab/DI-adventure.git
+```
+推荐使用 git 作为代码管理工具，记录每一次的修改，推荐 [git 教程](https://www.liaoxuefeng.com/wiki/896043488029600)。
 ### 强化学习库 DI-engine 安装
 - 由于这次大作业的目标不是强化学习算法，因此代码中使用了开源强化学习库 DI-engine 作为具体的强化学习算法实现，安装方法如下：
 ```bash
-## 1. 直接通过pip安装
-pip install DI-engine
-## 2. 或者通过 git 安装
-git clone https://github.com/opendilab/DI-adventure.git
+# clone主分支到本地
+git clone https://github.com/opendilab/DI-engine.git
 cd DI-engine
+# 查看远程分支
+git branch -a
+# 使用 7f8c53ec6c0f3b7552cc144803422ca96d8da36e 的commit id。
+git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
 pip install -e .
+```
+- (OPTIONAL)由于DI-adventure在不断更新，如果您目前使用的是老版本的DI-adventure，可能需要通过以下方式同步更新：
+```bash
+# 1. 切换到正确的DI-engine版本：
+cd DI-engine
+git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
+# 2. 更新DI-adventure
+cd DI-adventure
+# 确认'origin'指向远端仓库‘git@github.com:opendilab/DI-adventure.git’
+git remote -v
+# 以下这步如果出现各种例如merge conflict问题，可以借助互联网或咨询助教帮助解决。
+# 或者直接重新安装DI-adventure，注意保存自己的更改。
+git pull origin main
 ```
 - 修改 gym 版本
 ```bash
@@ -79,12 +104,15 @@ pip install tensorboard
 tensorboard --logdir <exp_dir> --bind_all
 ```
 tensorboard 中指标含义如下
-- basic/eval_episode_reward_mean：平均每局游戏（episode）所能获取的分数随着与环境交互的步数（step）的变化情况，一般1-1关卡接近3000分就是成功通关；
+- basic/eval_episode_return_mean：平均每局游戏（episode）所能获取的回报随着与环境交互的步数（step）的变化情况，一般1-1关卡2500分以上就是成功通关；
+- basic/eval_episode_discount_return_mean：平均每局游戏（episode）所能获取的折扣回报随着与环境交互的步数（step）的变化情况；
 - basic/exploration_epsilon：DQN在采集数据时，使用的是 $\epsilon$-greedy 算法，$\epsilon$ 随着与环境交互的步数（step）的变化情况，一般会是逐步下降；
 - basic/train_cur_lr：神经网络学习率的变化情况；
 - basic/train_q_value：训练过程中，Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，大趋势会是逐步上升；
 - basic/train_target_q_value：baseline 代码使用了 target-Q network 来稳定训练，这个是 target Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，应该会和 Q-network 的变化趋势接近；
 - basic/train_total_loss：神经网络训练过程中的损失（loss）随着 step 的变化情况；
+- eval_replay_videos：评估时的渲染结果；
+- eval_q_value_distribution：评估时Q值的分布随着环境交互步数的变化情况。
 
 总体而言，目标是在尽可能少的环境交互步数能达到尽可能高的回报。
 
@@ -117,3 +145,5 @@ python3 -u evaluate.py -s <SEED> -ckpt <CHECKPOINT_PATH> -rp <REPLAY_PATH>
 - [ ] 提供更多的wrapper以供尝试
 - [ ] 分析范例（Class Activation Mapping + 光流等）
 > 后续更新会在群里进行通知
+# 对于大作业任务书的一些补充说明：
+- “3.2【baseline 跑通】（3）训练出能够通关简单级别关卡（1-1 ~~，1-2~~ ）的智能体”。 考虑到算力等因素，大家只需要关注关卡1-1即可。

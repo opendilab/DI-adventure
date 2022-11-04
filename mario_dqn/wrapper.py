@@ -18,16 +18,18 @@ class StickyActionWrapper(gym.ActionWrapper):
         - ``p_sticky``: possibility to select the last action
     """
 
-    def __init__(self, env: gym.Env, p_sticky: float):
+    def __init__(self, env: gym.Env, p_sticky: float=0.25):
         super().__init__(env)
         self.p_sticky = p_sticky
         self.last_action = 0
 
     def action(self, action):
         if np.random.random() < self.p_sticky:
-            action = self.last_action
+            return_action = self.last_action
+        else:
+            return_action = action
         self.last_action = action
-        return action
+        return return_action
 
 
 class SparseRewardWrapper(gym.Wrapper):
@@ -66,8 +68,10 @@ class CoinRewardWrapper(gym.Wrapper):
 
     def __init__(self, env: gym.Env):
         super().__init__(env)
+        self.num_coins = 0
 
     def step(self, action):
         obs, reward, done, info = self.env.step(action)
-        reward += info['coins'] * 10
+        reward += (info['coins'] - self.num_coins) * 10
+        self.num_coins = info['coins']
         return obs, reward, done, info
