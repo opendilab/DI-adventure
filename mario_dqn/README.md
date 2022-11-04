@@ -25,16 +25,34 @@ pip install opencv-python
 ```bash
 git clone https://github.com/opendilab/DI-adventure
 ```
-如果出现网络问题，也可以直接去到 DI-advanture 的仓库手动下载后解压。这样做的缺陷是需要手动初始化 git 。推荐使用 git 作为代码管理工具，记录每一次的修改，推荐 [git 教程](https://www.liaoxuefeng.com/wiki/896043488029600)。
+如果出现网络问题，也可以直接去到 DI-advanture 的仓库手动下载后解压。这样做的缺陷是需要手动初始化 git 与设置远端仓库地址：
+```bash
+# 如果您是通过手动解压的方式才需要执行以下内容
+git init
+git add * && git commit -m 'init repo'
+git remote set-url origin https://github.com/opendilab/DI-adventure.git
+```
+推荐使用 git 作为代码管理工具，记录每一次的修改，推荐 [git 教程](https://www.liaoxuefeng.com/wiki/896043488029600)。
 ### 强化学习库 DI-engine 安装
 - 由于这次大作业的目标不是强化学习算法，因此代码中使用了开源强化学习库 DI-engine 作为具体的强化学习算法实现，安装方法如下：
 ```bash
-## 1. 直接通过pip安装
-pip install DI-engine==0.4.4
-## 2. 或者通过 git 安装
-git clone -b v0.4.4 --depth=1 https://github.com/opendilab/DI-adventure.git
+git clone -b dev-eval-vlz --depth=1 https://github.com/opendilab/DI-engine.git
 cd DI-engine
 pip install -e .
+```
+- (OPTIONAL)由于DI-adventure在不断更新，如果您目前使用的是老版本的DI-adventure，可能需要通过以下方式同步更新：
+```bash
+# 1. 请确保自己安装的是dev-eval-vlz分支的DI-engine，最简单的方法就是重新安装DI-engine
+git clone -b dev-eval-vlz --depth=1 https://github.com/opendilab/DI-adventure.git
+cd DI-engine
+pip install -e .
+# 2. 更新DI-adventure
+cd DI-adventure
+# 确认'orgin'指向远端仓库‘git@github.com:opendilab/DI-adventure.git’
+git remote -v
+# 以下这步如果出现各种例如merge conflict问题，可以借助互联网或咨询助教帮助解决。
+# 或者直接重新安装DI-adventure，注意保存自己的更改。
+git pull origin main
 ```
 - 修改 gym 版本
 ```bash
@@ -82,12 +100,15 @@ pip install tensorboard
 tensorboard --logdir <exp_dir> --bind_all
 ```
 tensorboard 中指标含义如下
-- basic/eval_episode_reward_mean：平均每局游戏（episode）所能获取的分数随着与环境交互的步数（step）的变化情况，一般1-1关卡2500分以上就是成功通关；
+- basic/eval_episode_return_mean：平均每局游戏（episode）所能获取的回报随着与环境交互的步数（step）的变化情况，一般1-1关卡2500分以上就是成功通关；
+- basic/eval_episode_discount_return_mean：平均每局游戏（episode）所能获取的折扣回报随着与环境交互的步数（step）的变化情况；
 - basic/exploration_epsilon：DQN在采集数据时，使用的是 $\epsilon$-greedy 算法，$\epsilon$ 随着与环境交互的步数（step）的变化情况，一般会是逐步下降；
 - basic/train_cur_lr：神经网络学习率的变化情况；
 - basic/train_q_value：训练过程中，Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，大趋势会是逐步上升；
 - basic/train_target_q_value：baseline 代码使用了 target-Q network 来稳定训练，这个是 target Q-network 预测的Q值随着与环境交互的步数（step）的变化情况，应该会和 Q-network 的变化趋势接近；
 - basic/train_total_loss：神经网络训练过程中的损失（loss）随着 step 的变化情况；
+- eval_replay_videos：评估时的渲染结果；
+- eval_q_value_distribution：评估时Q值的分布随着环境交互步数的变化情况。
 
 总体而言，目标是在尽可能少的环境交互步数能达到尽可能高的回报。
 
