@@ -39,7 +39,7 @@ def get_hist_gif(data, max_length, action_shape):
         new_data.append(np.stack(q_value_dist))
     new_data = np.stack(new_data)
 
-    os.popen('tmp.gif')
+    os.remove('tmp.gif')
     return new_data
 
 
