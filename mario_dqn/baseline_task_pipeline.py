@@ -19,10 +19,11 @@ from nes_py.wrappers import JoypadSpace
 from policy import DQNPolicy
 from model import DQN
 from wrapper import MaxAndSkipWrapper, WarpFrameWrapper, ScaledFloatFrameWrapper, FinalEvalRewardEnv, \
-    FrameStackWrapper
+    FrameStackWrapper, DiscountReturnWrapper
 from middleware import online_logger
 
 # config 配置文件，这一部分主要包含一些超参数的配置，大家只用关注 model 中的参数即可
+discount_factor = 0.99
 mario_dqn_config = dict(
     # 实验结果的存放路径
     exp_name='exp/mario_dqn_baseline',
@@ -35,7 +36,7 @@ mario_dqn_config = dict(
         evaluator_env_num=8,
         # 评估轮次
         n_evaluator_episode=8,
-        # 训练停止的分数（这里设置了一个不可能达到的分数）
+        # 训练停止的分数（这里设置了一个不可能达到的分数)
         stop_value=100000,
     ),
     policy=dict(
@@ -52,7 +53,7 @@ mario_dqn_config = dict(
         # n-step td
         nstep=3,
         # 折扣系数 gamma
-        discount_factor=0.99,
+        discount_factor=discount_factor,
         learn=dict(
             # 每次利用相同的经验更新的次数
             update_per_collect=10,
@@ -84,6 +85,7 @@ def wrapped_mario_env():
                 lambda env: ScaledFloatFrameWrapper(env),
                 lambda env: FrameStackWrapper(env, n_frames=1),
                 lambda env: FinalEvalRewardEnv(env),
+                lambda env: DiscountReturnWrapper(env, discount_factor=discount_factor),
             ]
         }
     )
@@ -110,7 +112,7 @@ def main(mario_main_config, mario_create_config, seed):
         buffer_ = DequeBuffer(size=cfg.policy.other.replay_buffer.replay_buffer_size)
         policy = DQNPolicy(cfg.policy, model=model)
 
-        task.use(interaction_evaluator(cfg, policy.eval_mode, evaluator_env))
+        task.use(interaction_evaluator(cfg, policy.eval_mode, evaluator_env, render=True))
         task.use(eps_greedy_handler(cfg))
         task.use(StepCollector(cfg, policy.collect_mode, collector_env))
         task.use(nstep_reward_enhancer(cfg))
