@@ -49,6 +49,8 @@ pip install -e .
 ```bash
 # 1. 切换到正确的DI-engine版本：
 cd DI-engine
+git pull origin main
+git fetch origin dev-eval-viz
 git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
 # 2. 更新DI-adventure
 cd DI-adventure
@@ -62,6 +64,10 @@ git pull origin main
 ```bash
 # DI-engine这里可能会将gym版本改为0.25.2，需要手动改回来
 pip install gym==0.25.1
+```
+- 安装moviepy以在tensorboard中保存GIF图像
+```bash
+pip install moviepy
 ```
 ## 2. Baseline 代码运行
 - 项目结构
