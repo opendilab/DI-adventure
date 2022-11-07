@@ -43,12 +43,14 @@ def get_hist_gif(data, max_length, action_shape):
     return new_data
 
 
-def online_logger(record_train_iter: bool = False, train_show_freq: int = 100) -> Callable:
+def online_logger(record_train_iter: bool = False, train_show_freq: int = 100, video_save_freq: int = int(5e5)) -> Callable:
     writer = DistributedWriter.get_instance()
     last_train_show_iter = -1
+    last_video_save_step = -1
 
     def _logger(ctx: "OnlineRLContext"):
         nonlocal last_train_show_iter
+        nonlocal last_video_save_step
         if not np.isinf(ctx.eval_value):
             if record_train_iter:
                 writer.add_scalar('basic/eval_episode_return_mean-env_step', ctx.eval_value, ctx.env_step)
@@ -70,23 +72,24 @@ def online_logger(record_train_iter: bool = False, train_show_freq: int = 100) -
                     ctx.env_step
                 )
                 writer.add_scalar('basic/exploration_epsilon', ctx.collect_kwargs['eps'], ctx.env_step)
-            writer.add_video('eval_replay_videos', ctx.eval_output['replay_video'], ctx.env_step, 30)
-
-            output = ctx.eval_output['output']
-            q_value_dist = [np.stack([t['logit'] for t in o]) for o in output]
-            max_length = max(q.shape[0] for q in q_value_dist)
-            action_shape = q_value_dist[0].shape[1]
-            for i in range(len(q_value_dist)):
-                N = q_value_dist[i].shape[0]
-                if N < max_length:
-                    q_value_dist[i] = np.concatenate(
-                        [q_value_dist[i]] + [q_value_dist[:-1] for _ in range(max_length - N)]
-                    )
-
-            q_value_dist = get_hist_gif(q_value_dist, max_length, action_shape)
-            writer.add_video('eval_q_value_distribution', q_value_dist, ctx.env_step, 30)
-
-            writer.flush()
+            if (ctx.env_step - last_video_save_step) > video_save_freq:
+                # save replay video
+                writer.add_video('eval_replay_videos', ctx.eval_output['replay_video'], ctx.env_step, 30)
+                output = ctx.eval_output['output']
+                # save q distribution
+                q_value_dist = [np.stack([t['logit'] for t in o]) for o in output]
+                max_length = max(q.shape[0] for q in q_value_dist)
+                action_shape = q_value_dist[0].shape[1]
+                for i in range(len(q_value_dist)):
+                    N = q_value_dist[i].shape[0]
+                    if N < max_length:
+                        q_value_dist[i] = np.concatenate(
+                            [q_value_dist[i]] + [q_value_dist[:-1] for _ in range(max_length - N)]
+                        )
+                q_value_dist = get_hist_gif(q_value_dist, max_length, action_shape)
+                writer.add_video('eval_q_value_distribution', q_value_dist, ctx.env_step, 30)
+                writer.flush()
+                last_video_save_step = ctx.env_step
         if ctx.train_output is not None and ctx.train_iter - last_train_show_iter >= train_show_freq:
             last_train_show_iter = ctx.train_iter
             output = ctx.train_output.pop()
@@ -97,5 +100,4 @@ def online_logger(record_train_iter: bool = False, train_show_freq: int = 100) -
                     writer.add_scalar('basic/train_{}-env_step'.format(k), v, ctx.env_step)
                 else:
                     writer.add_scalar('basic/train_{}'.format(k), v, ctx.env_step)
-
     return _logger

@@ -118,7 +118,7 @@ def main(mario_main_config, mario_create_config, seed):
         task.use(nstep_reward_enhancer(cfg))
         task.use(data_pusher(cfg, buffer_))
         task.use(OffPolicyLearner(cfg, policy.learn_mode, buffer_))
-        task.use(online_logger(record_train_iter=False, train_show_freq=500))
+        task.use(online_logger(record_train_iter=False, train_show_freq=500, video_save_freq=int(5e5)))
         task.use(CkptSaver(cfg, policy, train_freq=10000))
         task.use(termination_checker(max_env_step=int(1e7)))
         task.run()
