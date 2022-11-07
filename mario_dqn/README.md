@@ -49,6 +49,8 @@ pip install -e .
 ```bash
 # 1. 切换到正确的DI-engine版本：
 cd DI-engine
+git pull origin main
+git fetch origin dev-eval-viz
 git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
 # 2. 更新DI-adventure
 cd DI-adventure
