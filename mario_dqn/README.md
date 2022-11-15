@@ -39,10 +39,8 @@ git remote set-url origin https://github.com/opendilab/DI-adventure.git
 # clone主分支到本地
 git clone https://github.com/opendilab/DI-engine.git
 cd DI-engine
-# 查看远程分支
-git branch -a
-# 使用 7f8c53ec6c0f3b7552cc144803422ca96d8da36e 的commit id。
-git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
+# 使用 721e6718513245f0eabe9c4aa44e3ed8fa78b843 的 commit id 对应的版本。
+git checkout 721e6718513245f0eabe9c4aa44e3ed8fa78b843
 pip install -e .
 ```
 - (OPTIONAL)由于DI-adventure在不断更新，如果您目前使用的是老版本的DI-adventure，可能需要通过以下方式同步更新：
@@ -50,8 +48,7 @@ pip install -e .
 # 1. 切换到正确的DI-engine版本：
 cd DI-engine
 git pull origin main
-git fetch origin dev-eval-viz
-git checkout 7f8c53ec6c0f3b7552cc144803422ca96d8da36e
+git checkout 721e6718513245f0eabe9c4aa44e3ed8fa78b843
 # 2. 更新DI-adventure
 cd DI-adventure
 # 确认'origin'指向远端仓库‘git@github.com:opendilab/DI-adventure.git’
