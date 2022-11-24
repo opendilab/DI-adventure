@@ -197,12 +197,12 @@ class DQNPolicy(Policy):
         self._learn_model.train()
         self._target_model.train()
         # Current q value (main model)
-        q_value = self._learn_model.forward(data['obs'])['logit']
+        q_value = self._learn_model.forward(data['obs'], mode='compute_q')['logit']
         # Target q value
         with torch.no_grad():
-            target_q_value = self._target_model.forward(data['next_obs'])['logit']
+            target_q_value = self._target_model.forward(data['next_obs'], mode='compute_q')['logit']
             # Max q value action (main model)
-            target_q_action = self._learn_model.forward(data['next_obs'])['action']
+            target_q_action = self._learn_model.forward(data['next_obs'], mode='compute_q')['action']
 
         data_n = q_nstep_td_data(
             q_value, target_q_value, data['action'], target_q_action, data['reward'], data['done'], data['weight']
@@ -299,7 +299,7 @@ class DQNPolicy(Policy):
             data = to_device(data, self._device)
         self._collect_model.eval()
         with torch.no_grad():
-            output = self._collect_model.forward(data, eps=eps)
+            output = self._collect_model.forward(data, mode='compute_q', eps=eps)
         if self._cuda:
             output = to_device(output, 'cpu')
         output = default_decollate(output)
@@ -376,7 +376,7 @@ class DQNPolicy(Policy):
             data = to_device(data, self._device)
         self._eval_model.eval()
         with torch.no_grad():
-            output = self._eval_model.forward(data)
+            output = self._eval_model.forward(data, mode='compute_q')
         if self._cuda:
             output = to_device(output, 'cpu')
         output = default_decollate(output)

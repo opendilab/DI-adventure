@@ -8,6 +8,8 @@ from ding.model.common import FCEncoder, ConvEncoder, DiscreteHead, DuelingHead,
 
 class DQN(nn.Module):
 
+    mode = ['compute_q', 'compute_q_logit']
+
     def __init__(
             self,
             obs_shape: Union[int, SequenceType],
@@ -70,7 +72,13 @@ class DQN(nn.Module):
                 head_hidden_size, action_shape, head_layer_num, activation=activation, norm_type=norm_type
             )
 
-    def forward(self, x: torch.Tensor) -> Dict:
+
+    def forward(self, x: torch.Tensor, mode: str='compute_q_logit') -> Dict:
+        assert mode in self.mode, "not support forward mode: {}/{}".format(mode, self.mode)
+        return getattr(self, mode)(x)
+
+
+    def compute_q(self, x: torch.Tensor) -> Dict:
         r"""
         Overview:
             DQN forward computation graph, input observation tensor to predict q_value.
@@ -92,3 +100,9 @@ class DQN(nn.Module):
         x = self.encoder(x)
         x = self.head(x)
         return x
+
+
+    def compute_q_logit(self, x: torch.Tensor) -> Dict:
+        x = self.encoder(x)
+        x = self.head(x)
+        return x['logit']

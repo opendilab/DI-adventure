@@ -12,13 +12,13 @@ import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT
 from nes_py.wrappers import JoypadSpace
 from wrapper import MaxAndSkipWrapper, WarpFrameWrapper, ScaledFloatFrameWrapper, FrameStackWrapper, \
-    FinalEvalRewardEnv
+    FinalEvalRewardEnv, RecordCAM
 
 action_dict = {2: [["right"], ["right", "A"]], 7: SIMPLE_MOVEMENT, 12: COMPLEX_MOVEMENT}
 action_nums = [2, 7, 12]
 
 
-def wrapped_mario_env(version=0, action=2, obs=1):
+def wrapped_mario_env(model, cam_video_path, version=0, action=2, obs=1):
     return DingEnvWrapper(
         JoypadSpace(gym_super_mario_bros.make("SuperMarioBros-1-1-v"+str(version)), action_dict[int(action)]),
         cfg={
@@ -28,6 +28,7 @@ def wrapped_mario_env(version=0, action=2, obs=1):
                 lambda env: ScaledFloatFrameWrapper(env),
                 lambda env: FrameStackWrapper(env, n_frames=obs),
                 lambda env: FinalEvalRewardEnv(env),
+                lambda env: RecordCAM(env, cam_model=model, video_folder=cam_video_path)
             ]
         }
     )
@@ -35,9 +36,9 @@ def wrapped_mario_env(version=0, action=2, obs=1):
 
 def evaluate(args, state_dict, seed, video_dir_path, eval_times):
     cfg = compile_config(mario_dqn_config, create_cfg=mario_dqn_create_config, auto=True, save_cfg=False)
-    env = wrapped_mario_env(args.version, args.action, args.obs)
     model = DQN(**cfg.policy.model)
     model.load_state_dict(state_dict['model'])
+    env = wrapped_mario_env(model, args.replay_path, args.version, args.action, args.obs)
     policy = DQNPolicy(cfg.policy, model=model).eval_mode
     env.seed(seed)
     set_pkg_seed(seed, use_cuda=cfg.policy.cuda)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", "-s", type=int, default=0)
-    parser.add_argument("--checkpoint", "-ckpt", type=str, default='./exp/mario_dqn_baseline/ckpt/eval.pth.tar')
+    parser.add_argument("--checkpoint", "-ckpt", type=str, default='/mnt/nfs/wangzilin/research/BDA/results/v0_2a_1f/exp/v0_2a_1f_seed0/ckpt/ckpt_best.pth.tar')
     parser.add_argument("--replay_path", "-rp", type=str, default='./eval_videos')
     parser.add_argument("--version", "-v", type=int, default=0, choices=[0,1,2,3])
     parser.add_argument("--action", "-a", type=int, default=2, choices=[2,7,14])
