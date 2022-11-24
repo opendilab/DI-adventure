@@ -110,7 +110,6 @@ def dump_arr2video(arr, video_folder):
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     fps = 6
     size = (256, 240)
-    # size = (512, 512)
     out = cv2.VideoWriter(video_folder + '/cam_pure.mp4', fourcc, fps, size)
     out1 = cv2.VideoWriter(video_folder + '/obs_pure.mp4', fourcc, fps, size)
     out2 = cv2.VideoWriter(video_folder + '/merged.mp4', fourcc, fps, size)
@@ -128,7 +127,7 @@ def dump_arr2video(arr, video_folder):
 
 
 def get_cam(img, model):
-    target_layers = [model.encoder.main[-3]]
+    target_layers = [model.encoder.main[0]]
     input_tensor = torch.from_numpy(img).unsqueeze(0)
 
     # Construct the CAM object once, and then re-use it on many images:

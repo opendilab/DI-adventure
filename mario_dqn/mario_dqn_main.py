@@ -23,7 +23,7 @@ action_dict = {2: [["right"], ["right", "A"]], 7: SIMPLE_MOVEMENT, 12: COMPLEX_M
 action_nums = [2, 7, 12]
 
 
-def wrapped_mario_env(version=0, action=2, obs=1):
+def wrapped_mario_env(version=0, action=7, obs=1):
     return DingEnvWrapper(
         JoypadSpace(gym_super_mario_bros.make("SuperMarioBros-1-1-v"+str(version)), action_dict[int(action)]),
         cfg={
@@ -117,9 +117,9 @@ if __name__ == "__main__":
     from copy import deepcopy
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", "-s", type=int, default=0, choices=[0,1,2])
+    parser.add_argument("--seed", "-s", type=int, default=0)
     parser.add_argument("--version", "-v", type=int, default=0, choices=[0,1,2,3])
-    parser.add_argument("--action", "-a", type=int, default=2, choices=[2,7,14])
+    parser.add_argument("--action", "-a", type=int, default=7, choices=[2,7,14])
     parser.add_argument("--obs", "-o", type=int, default=1, choices=[1,4])
     args = parser.parse_args()
     mario_dqn_config.exp_name = 'exp/v'+str(args.version)+'_'+str(args.action)+'a_'+str(args.obs)+'f_seed'+str(args.seed)
