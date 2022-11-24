@@ -81,7 +81,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", "-s", type=int, default=0)
-    parser.add_argument("--checkpoint", "-ckpt", type=str, default='/mnt/nfs/wangzilin/research/BDA/results/v0_2a_1f/exp/v0_2a_1f_seed0/ckpt/ckpt_best.pth.tar')
+    parser.add_argument("--checkpoint", "-ckpt", type=str, default='./exp/v0_1a_7f_seed0/ckpt/ckpt_best.pth.tar')
     parser.add_argument("--replay_path", "-rp", type=str, default='./eval_videos')
     parser.add_argument("--version", "-v", type=int, default=0, choices=[0,1,2,3])
     parser.add_argument("--action", "-a", type=int, default=2, choices=[2,7,14])
