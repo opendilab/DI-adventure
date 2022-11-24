@@ -15,6 +15,7 @@ import warnings
 import copy
 
 
+# 粘性动作wrapper
 class StickyActionWrapper(gym.ActionWrapper):
     """
     Overview:
@@ -40,6 +41,7 @@ class StickyActionWrapper(gym.ActionWrapper):
         return return_action
 
 
+# 稀疏奖励wrapper
 class SparseRewardWrapper(gym.Wrapper):
     """
     Overview:
@@ -64,6 +66,7 @@ class SparseRewardWrapper(gym.Wrapper):
         return obs, reward, done, info
 
 
+# 硬币奖励wrapper
 class CoinRewardWrapper(gym.Wrapper):
     """
     Overview:
@@ -85,27 +88,7 @@ class CoinRewardWrapper(gym.Wrapper):
         return obs, reward, done, info
 
 
-class DiscountReturnWrapper(gym.Wrapper):
-
-    def __init__(self, env: gym.Env, discount_factor: float) -> None:
-        super().__init__(env)
-        self.discount_factor = discount_factor
-
-    def reset(self):
-        self.episode_reward = []
-        return self.env.reset()
-
-    def step(self, action):
-        obs, reward, done, info = self.env.step(action)
-        self.episode_reward.append(reward)
-        if done:
-            discount_return = 0.
-            for r in reversed(self.episode_reward):
-                discount_return = r + self.discount_factor * discount_return
-            info['episode_info'] = {'discount_return': discount_return}
-        return obs, reward, done, info
-
-
+# CAM相关，不需要了解
 def dump_arr2video(arr, video_folder):
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     fps = 6

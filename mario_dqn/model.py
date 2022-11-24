@@ -1,3 +1,6 @@
+"""
+神经网络模型定义
+"""
 from typing import Union, Optional, Dict, Callable, List
 import torch
 import torch.nn as nn

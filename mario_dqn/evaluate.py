@@ -35,21 +35,33 @@ def wrapped_mario_env(model, cam_video_path, version=0, action=2, obs=1):
 
 
 def evaluate(args, state_dict, seed, video_dir_path, eval_times):
+    # 加载配置
     cfg = compile_config(mario_dqn_config, create_cfg=mario_dqn_create_config, auto=True, save_cfg=False)
+    # 实例化DQN模型
     model = DQN(**cfg.policy.model)
+    # 加载模型权重文件
     model.load_state_dict(state_dict['model'])
+    # 生成环境
     env = wrapped_mario_env(model, args.replay_path, args.version, args.action, args.obs)
+    # 实例化DQN策略
     policy = DQNPolicy(cfg.policy, model=model).eval_mode
+    # 设置seed
     env.seed(seed)
     set_pkg_seed(seed, use_cuda=cfg.policy.cuda)
+    # 保存录像
     env.enable_save_replay(video_dir_path)
     eval_reward_list = []
+    # 评估
     for n in range(eval_times):
+        # 环境重置，返回初始观测
         obs = env.reset()
         eval_reward = 0
         while True:
+            # 策略根据观测返回所有动作的Q值以及Q值最大的动作
             Q = policy.forward({0: obs})
+            # 获取动作
             action = Q[0]['action'].item()
+            # 将动作传入环境，环境返回下一帧信息
             obs, reward, done, info = env.step(action)
             eval_reward += reward
             if done or info['time'] < 250:
