@@ -10,10 +10,10 @@ mario_dqn_config = dict(
     env=dict(
         # 用来收集经验（experience）的mario环境的数目
         # 请根据机器的性能自行增减
-        collector_env_num=8,
+        collector_env_num=2,
         # 用来评估智能体性能的mario环境的数目
         # 请根据机器的性能自行增减
-        evaluator_env_num=8,
+        evaluator_env_num=2,
         # 评估轮次
         n_evaluator_episode=8,
         # 训练停止的分数（这里设置了一个不可能达到的分数）

@@ -119,15 +119,6 @@ def main(cfg, args, seed=0, max_env_step=int(3e6)):
             learner.train(train_data, collector.envstep)
         if collector.envstep >= max_env_step:
             break
-    # 训练结束后进行评估
-    evaluator_env = BaseEnvManager(
-        env_fn=[wrapped_mario_env for _ in range(evaluator_env_num)], cfg=cfg.env.manager
-    )
-    evaluator_env.enable_save_replay(cfg.env.replay_path)  # switch save replay interface
-    evaluator = InteractionSerialEvaluator(
-        cfg.policy.eval.evaluator, evaluator_env, policy.eval_mode, tb_logger, exp_name=cfg.exp_name
-    )
-    evaluator.eval(learner.save_checkpoint, learner.train_iter, collector.envstep)
 
 
 if __name__ == "__main__":
