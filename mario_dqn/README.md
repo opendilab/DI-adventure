@@ -8,7 +8,7 @@
 > mario环境的安装教程在网络学堂上，可以自行取用，需要注意：
 > 1. 请选择3.8版本的python以避免不必要的版本问题；
 > 2. 通过键盘与环境交互需要有可以用于渲染的显示设备，大部分服务器不能胜任，可以选择本地设备或者暂时跳过这一步，对后面没有影响；
-> 3. 本实验需要有GPU才可能进行，且最好能使用服务器，否则可能需要以牺牲性能的代价换取可运行性；
+> 3. GPU服务器对于强化学习大作业是必须的，如果没有足够的计算资源（笔记本电脑可能难以承担）可能无法顺利完成所有实验；
 ### 深度学习框架 PyTorch 安装
 这一步有网上有非常多的教程，请自行搜索学习，这里不予赘述。
 > 请安装 1.10.0 版本以避免不必要的环境问题
@@ -84,15 +84,16 @@ pip install grad-cam
 - 神经网络结构
 ![](assets/dqn.png)
 - 代码运行
+
+推荐使用[tmux](http://www.ruanyifeng.com/blog/2019/10/tmux.html)来管理实验，最好一次运行一组参数的3个seed。
 ```bash
 cd DI-adventure/mario_dqn
-# 对于每组实验，推荐设置三个种子（seed）进行实验
+# 对于每组参数，推荐设置三个种子（例如seed=0/1/2）进行3组实验实验
 python3 -u mario_dqn_main.py -s <SEED> -v <VERSION> -a <ACTION SET> -o <FRAME NUMBER>
 # 以下命令的含义是，设置seed=0，游戏版本v0，动作数目为7（即SIMPLE_MOVEMENT），观测通道数目1（即不进行叠帧）进行训练。
 python3 -u mario_dqn_main.py -s 0 -v 0 -a 7 -o 1
-# 训练到与环境交互10,000,000 steps时程序会自动停止
-
 ```
+训练到与环境交互10,000,000 steps时程序会自动停止，运行时长依据机器性能在10小时到30小时不等
 ## 3. 智能体性能评估
 ## tensorboard 查看训练过程中的曲线
 - 首先安装 tensorboard 工具：
@@ -101,7 +102,7 @@ pip install tensorboard
 ```
 - 查看训练日志：
 ```bash
-tensorboard --logdir <exp_dir> --bind_all
+tensorboard --logdir <exp_dir>
 ```
 ### tensorboard 中指标含义如下
 tensorboard结果分为 buffer, collector, evaluator, learner 四个部分，以\_iter结尾表明横轴是训练迭代iteration数目，以\_step结尾表明横轴是与环境交互步数step。
@@ -134,6 +135,7 @@ python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <
 1. tensorboard结果曲线；
 2. 游戏录像；
 3. 类别激活映射CAM；
+
 三个角度入手分析即可。
 # 4. 特征处理
 - 包括对于观测空间（observation space）、动作空间（action space）和奖励空间（reward space）的处理；
@@ -143,17 +145,26 @@ python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <
 
 可以对以下特征空间更改进行尝试：
 ### 观测空间（observation space）
-代码中mario_dqn_main已经提供了观测空间更改的命令接口，因此不用更改代码。
-- 增加图像输入信息密度，即将游戏版本从`v0`更改为`v1`，`-v 1`；
-- 堆叠四帧作为输入`-o 4`；
-- 图像降采样（尝试游戏版本`v2`、`v3`的效果），`-v 2/3`；
+- 图像降采样，即将游戏版本从`v0`更改为`v1`，游戏版本的内容请参照[mario游戏仓库](https://github.com/Kautenja/gym-super-mario-bros)：`-v 1`；
+- 堆叠四帧作为输入，即输入变为`(4,84,84)`的图像：`-o 4`；
+    - 叠帧wrapper可以将连续多帧的图像叠在一起送入网络，补充mario运动的速度等单帧图像无法获取的信息；
+- 图像内容简化（尝试游戏版本`v2`、`v3`的效果）：`-v 2/3`；
 ### 动作空间（action space）
-- 动作简化，将 `SIMPLE_ACTION` 替换为 `[['right'], ['right', 'A']]`，`-a 2`；
-- 增加动作的多样性，将 `SIMPLE_ACTION` 替换为 `COMPLEX_MOVEMENT`，`-a 12`；
+- 动作简化，将 `SIMPLE_ACTION` 替换为 `[['right'], ['right', 'A']]`：`-a 2`；
+    - mario提供了不同的[按键组合](https://github.com/Kautenja/gym-super-mario-bros/blob/master/gym_super_mario_bros/actions.py)，有时候简化动作种类能有效降低训练前期学习的困难，但可能降低操作上限；
+- 增加动作的多样性，将 `SIMPLE_ACTION` 替换为 `COMPLEX_MOVEMENT`：`-a 12`；
+    - 也许能提高上限；
 - 粘性动作 sticky action（给环境添加 `StickyActionWrapper`，方式和其它自带的 wrapper 相同，即`lambda env: StickyActionWrapper(env)`）
-### 奖励空间（reward space）
-- 尝试给予金币奖励（给环境添加 `CoinRewardWrapper`，方式和其它自带的 wrapper 相同）
+    - 粘性动作的含义是，智能体有一定概率直接采用上一帧的动作，可以增加环境的随机性；
+### （拓展）奖励空间（reward space）
+
+目前mario的奖励请参照[mario游戏仓库](https://github.com/Kautenja/gym-super-mario-bros)
+- 尝试给予金币奖励（给环境添加 `CoinRewardWrapper`，方式和其它自带的 wrapper 相同）；
+    - 能否让mario学会吃金币呢；
 - 稀疏 reward，只有死亡和过关才给reward（给环境添加 `SparseRewardWrapper`，方式和其它自带的 wrapper 相同）
+    - 完全目标导向。稀疏奖励是强化学习想要落地必须克服的问题，有时候在结果出来前无法判断中途的某个动作的好坏；
+
+**由于同学们计算资源可能不是特别充分，这里提示一下，图像降采样、图像内容简化、叠帧、动作简化是比较有效能提升性能的方法！**
 # 对于大作业任务书的一些补充说明：
 **如果不知道接下来要做什么了，请参考任务书或咨询助教！！！**
 - “3.2【baseline 跑通】（3）训练出能够通关简单级别关卡（1-1 ~~，1-2~~ ）的智能体”。 考虑到算力等因素，大家只需要关注关卡1-1即可。
