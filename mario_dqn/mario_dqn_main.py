@@ -48,7 +48,7 @@ def wrapped_mario_env(version=0, action=7, obs=1):
     )
 
 
-def main(cfg, args, seed=0, max_env_step=int(1e7)):
+def main(cfg, args, seed=0, max_env_step=int(3e6)):
     # Easydict类实例，包含一些配置
     cfg = compile_config(
         cfg,
