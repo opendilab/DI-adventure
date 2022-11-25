@@ -93,7 +93,7 @@ python3 -u mario_dqn_main.py -s <SEED> -v <VERSION> -a <ACTION SET> -o <FRAME NU
 # 以下命令的含义是，设置seed=0，游戏版本v0，动作数目为7（即SIMPLE_MOVEMENT），观测通道数目1（即不进行叠帧）进行训练。
 python3 -u mario_dqn_main.py -s 0 -v 0 -a 7 -o 1
 ```
-训练到与环境交互10,000,000 steps时程序会自动停止，运行时长依据机器性能在10小时到30小时不等
+训练到与环境交互10,000,000 steps时程序会自动停止，运行时长依据机器性能在10小时到30小时不等，在此期间可以看看 mario_dqn_main.py 的代码逻辑。
 ## 3. 智能体性能评估
 ## tensorboard 查看训练过程中的曲线
 - 首先安装 tensorboard 工具：
@@ -128,7 +128,7 @@ DQN是off-policy算法，因此会有一个replay buffer用以保存数据，本
 ```bash
 python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <FRAME NUMBER>
 ```
-- 此外该命令还会保存评估时的游戏录像（请确保您的 ffmpeg 软件可用）与类别激活映射CAM，以供查看。
+- 此外该命令还会保存评估时的游戏录像（eval_videos/rl-video-xxx.mp4），与类别激活映射CAM（eval_videos/merged.mp4），以供查看，请确保您的 ffmpeg 软件可用。
 - 评估时由于mario环境确定（比较特殊），同时DQN是确定性（deterministic）策略，因此结果不会因为seed的改变而改变。但训练时由于需要探索，因此多个seed是必要的。
 
 具体而言，对于你想要分析的智能体，从：
