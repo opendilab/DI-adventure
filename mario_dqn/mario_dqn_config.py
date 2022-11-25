@@ -17,7 +17,7 @@ mario_dqn_config = dict(
         # 评估轮次
         n_evaluator_episode=8,
         # 训练停止的分数（这里设置了一个不可能达到的分数）
-        stop_value=100000
+        stop_value=3000
     ),
     policy=dict(
         # 是否使用 CUDA 加速（必要）

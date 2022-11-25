@@ -1,6 +1,6 @@
 # 强化学习大作业代码配置与运行
 > 同学们不要对于RL背后的数学原理和复杂的代码逻辑感到困扰，首先是本次大作业会很少涉及到这一部分，仓库中对这一部分都有着良好的封装；其次是有问题（原理或者代码实现上的）可以随时提问一起交流，方式包括但不限于：
-> - github issue
+> - github issue: https://github.com/opendilab/DI-adventure/issues
 > - 课程微信群
 > - 开发者邮箱: opendilab@pjlab.org.cn
 
@@ -85,15 +85,15 @@ pip install grad-cam
 ![](assets/dqn.png)
 - 代码运行
 
-推荐使用[tmux](http://www.ruanyifeng.com/blog/2019/10/tmux.html)来管理实验，最好一次运行一组参数的3个seed。
+推荐使用[tmux](http://www.ruanyifeng.com/blog/2019/10/tmux.html)来管理实验。
 ```bash
 cd DI-adventure/mario_dqn
-# 对于每组参数，推荐设置三个种子（例如seed=0/1/2）进行3组实验实验
+# 对于每组参数，如果有服务器，计算资源充足，推荐设置三个种子（例如seed=0/1/2）进行3组实验，否则先运行一个seed。
 python3 -u mario_dqn_main.py -s <SEED> -v <VERSION> -a <ACTION SET> -o <FRAME NUMBER>
-# 以下命令的含义是，设置seed=0，游戏版本v0，动作数目为7（即SIMPLE_MOVEMENT），观测通道数目1（即不进行叠帧）进行训练。
+# 以下命令的含义是，设置seed=0，游戏版本v0，动作数目为7（即SIMPLE_MOVEMENT），观测通道数目为1（即不进行叠帧）进行训练。
 python3 -u mario_dqn_main.py -s 0 -v 0 -a 7 -o 1
 ```
-训练到与环境交互10,000,000 steps时程序会自动停止，运行时长依据机器性能在10小时到30小时不等，在此期间可以看看 mario_dqn_main.py 的代码逻辑。
+训练到与环境交互3,000,000 steps时程序会自动停止，运行时长依据机器性能在3小时到10小时不等，这里如果计算资源充足的同学可以改成5,000,000 steps（main函数中设置max_env_step参数）。程序运行期间可以看看代码逻辑。
 ## 3. 智能体性能评估
 ## tensorboard 查看训练过程中的曲线
 - 首先安装 tensorboard 工具：
@@ -129,7 +129,7 @@ DQN是off-policy算法，因此会有一个replay buffer用以保存数据，本
 python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <FRAME NUMBER>
 ```
 - 此外该命令还会保存评估时的游戏录像（eval_videos/rl-video-xxx.mp4），与类别激活映射CAM（eval_videos/merged.mp4），以供查看，请确保您的 ffmpeg 软件可用。
-- 评估时由于mario环境确定（比较特殊），同时DQN是确定性（deterministic）策略，因此结果不会因为seed的改变而改变。但训练时由于需要探索，因此多个seed是必要的。
+- 评估时由于mario环境是确定性的（这个比较特殊），同时DQN是确定性（deterministic）策略，因此结果不会因为seed的改变而改变。但训练时由于需要探索，因此多个seed是必要的。
 
 具体而言，对于你想要分析的智能体，从：
 1. tensorboard结果曲线；
@@ -165,6 +165,17 @@ python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <
     - 完全目标导向。稀疏奖励是强化学习想要落地必须克服的问题，有时候在结果出来前无法判断中途的某个动作的好坏；
 
 **由于同学们计算资源可能不是特别充分，这里提示一下，图像降采样、图像内容简化、叠帧、动作简化是比较有效能提升性能的方法！**
+
+以下是非常缺少计算资源和时间，最小限度需要完成的实验任务：
+1. baseline（即`v0+SIMPLE MOVEMENT+1 Frame`）跑一个seed看看结果；
+2. 尝试简化动作空间的同时进行叠帧（即`v0+[['right'], ['right', 'A']]+4 Frame`）跑一个seed看看；
+3. 观测空间去除冗余信息（即`v1+[['right'], ['right', 'A']]+4 Frame`）跑一个seed看看，如果没通关则试试换个seed；
+4. 从tensorboard、可视化、CAM以及对特征空间的修改角度分析通关/没有通过的原因。
+
+对于有充足计算资源的同学，推荐增加实验的seed、延长实验步长到5M、更换其它游戏版本、尝试其它动作观测空间组合，使用其它的wrapper、以及free style；
+
+---
+**新增：一些实验[结果](https://github.com/opendilab/DI-adventure/blob/results/mario_dqn/README.md)供大家参考！**
 # 对于大作业任务书的一些补充说明：
 **如果不知道接下来要做什么了，请参考任务书或咨询助教！！！**
 - “3.2【baseline 跑通】（3）训练出能够通关简单级别关卡（1-1 ~~，1-2~~ ）的智能体”。 考虑到算力等因素，大家只需要关注关卡1-1即可。
