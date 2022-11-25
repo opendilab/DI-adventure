@@ -1,7 +1,7 @@
 """
-DQN算法，如果不考虑对算法做改动，可以直接默认使用该文件，不用详细了解代码
+DQN算法
 """
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Tuple
 from collections import namedtuple
 import copy
 import torch
@@ -9,30 +9,84 @@ import torch
 from ding.torch_utils import Adam, to_device
 from ding.rl_utils import q_nstep_td_data, q_nstep_td_error, get_nstep_return_data, get_train_sample
 from ding.model import model_wrap
-from ding.utils import POLICY_REGISTRY
 from ding.utils.data import default_collate, default_decollate
 
 from ding.policy import Policy
 from ding.policy.common_utils import default_preprocess_learn
 
 
-@POLICY_REGISTRY.register('mario_dqn')
 class DQNPolicy(Policy):
-    """
-    Overview: DQN implementation with Double DQN and nstep TD error tricks.
+    r"""
+    Overview:
+        Policy class of DQN algorithm, extended by Double DQN/Dueling DQN/PER/multi-step TD.
+
+    Config:
+        == ==================== ======== ============== ======================================== =======================
+        ID Symbol               Type     Default Value  Description                              Other(Shape)
+        == ==================== ======== ============== ======================================== =======================
+        1  ``type``             str      dqn            | RL policy register name, refer to      | This arg is optional,
+                                                        | registry ``POLICY_REGISTRY``           | a placeholder
+        2  ``cuda``             bool     False          | Whether to use cuda for network        | This arg can be diff-
+                                                                                                 | erent from modes
+        3  ``on_policy``        bool     False          | Whether the RL algorithm is on-policy
+                                                        | or off-policy
+        4  ``priority``         bool     False          | Whether use priority(PER)              | Priority sample,
+                                                                                                 | update priority
+        5  | ``priority_IS``    bool     False          | Whether use Importance Sampling Weight
+           | ``_weight``                                | to correct biased update. If True,
+                                                        | priority must be True.
+        6  | ``discount_``      float    0.97,          | Reward's future discount factor, aka.  | May be 1 when sparse
+           | ``factor``                  [0.95, 0.999]  | gamma                                  | reward env
+        7  ``nstep``            int      1,             | N-step reward discount sum for target
+                                         [3, 5]         | q_value estimation
+        8  | ``learn.update``   int      3              | How many updates(iterations) to train  | This args can be vary
+           | ``per_collect``                            | after collector's one collection. Only | from envs. Bigger val
+                                                        | valid in serial training               | means more off-policy
+        9  | ``learn.multi``    bool     False          | whether to use multi gpu during
+           | ``_gpu``
+        10 | ``learn.batch_``   int      64             | The number of samples of an iteration
+           | ``size``
+        11 | ``learn.learning`` float    0.001          | Gradient step length of an iteration.
+           | ``_rate``
+        12 | ``learn.target_``  int      100            | Frequence of target network update.    | Hard(assign) update
+           | ``update_freq``
+        13 | ``learn.ignore_``  bool     False          | Whether ignore done for target value   | Enable it for some
+           | ``done``                                   | calculation.                           | fake termination env
+        14 ``collect.n_sample`` int      [8, 128]       | The number of training samples of a    | It varies from
+                                                        | call of collector.                     | different envs
+        15 | ``collect.unroll`` int      1              | unroll length of an iteration          | In RNN, unroll_len>1
+           | ``_len``
+        16 | ``other.eps.type`` str      exp            | exploration rate decay type            | Support ['exp',
+                                                                                                 | 'linear'].
+        17 | ``other.eps.``     float    0.95           | start value of exploration rate        | [0,1]
+           | ``start``
+        18 | ``other.eps.``     float    0.1            | end value of exploration rate          | [0,1]
+           | ``end``
+        19 | ``other.eps.``     int      10000          | decay length of exploration            | greater than 0. set
+           | ``decay``                                                                           | decay=10000 means
+                                                                                                 | the exploration rate
+                                                                                                 | decay from start
+                                                                                                 | value to end value
+                                                                                                 | during decay length.
+        == ==================== ======== ============== ======================================== =======================
     """
 
     config = dict(
-        type='mario_dqn',
+        type='dqn',
         # (bool) Whether use cuda in policy
         cuda=False,
         # (bool) Whether learning policy is the same as collecting data policy(on-policy)
         on_policy=False,
+        # (bool) Whether enable priority experience sample
+        priority=False,
+        # (bool) Whether use Importance Sampling Weight to correct biased update. If True, priority must be True.
+        priority_IS_weight=False,
         # (float) Discount factor(gamma) for returns
         discount_factor=0.97,
         # (int) The number of step for calculating target q_value
         nstep=1,
         learn=dict(
+            # (bool) Whether to use multi gpu
             multi_gpu=False,
             # How many updates(iterations) to train after collector's one collection.
             # Bigger "update_per_collect" means bigger off-policy.
@@ -52,12 +106,12 @@ class DQNPolicy(Policy):
         ),
         # collect_mode config
         collect=dict(
-            # (int) how many collected samples per collect phase
-            n_sample=96,
+            # (int) Only one of [n_sample, n_episode] shoule be set
+            # n_sample=8,
             # (int) Cut trajectories into pieces with length "unroll_len".
             unroll_len=1,
         ),
-        eval=dict(evaluator=dict(eval_freq=2000, )),
+        eval=dict(),
         # other config
         other=dict(
             # Epsilon greedy with decay.
@@ -65,15 +119,28 @@ class DQNPolicy(Policy):
                 # (str) Decay type. Support ['exp', 'linear'].
                 type='exp',
                 # (float) Epsilon start value
-                start=1.,
+                start=0.95,
                 # (float) Epsilon end value
-                end=0.05,
+                end=0.1,
                 # (int) Decay length(env step)
-                decay=250000,
+                decay=10000,
             ),
-            replay_buffer=dict(replay_buffer_size=100000, ),
+            replay_buffer=dict(replay_buffer_size=10000, ),
         ),
     )
+
+    def default_model(self) -> Tuple[str, List[str]]:
+        """
+        Overview:
+            Return this algorithm default model setting for demonstration.
+        Returns:
+            - model_info (:obj:`Tuple[str, List[str]]`): model name and mode import_names
+
+        .. note::
+            The user can define and use customized network model but must obey the same inferface definition indicated \
+            by import_names path. For DQN, ``ding.model.template.q_learning.DQN``
+        """
+        return 'dqn', ['ding.model.template.q_learning']
 
     def _init_learn(self) -> None:
         """
@@ -81,6 +148,8 @@ class DQNPolicy(Policy):
             Learn mode init method. Called by ``self.__init__``, initialize the optimizer, algorithm arguments, main \
             and target model.
         """
+        self._priority = self._cfg.priority
+        self._priority_IS_weight = self._cfg.priority_IS_weight
         # Optimizer
         self._optimizer = Adam(self._model.parameters(), lr=self._cfg.learn.learning_rate)
 
@@ -99,7 +168,7 @@ class DQNPolicy(Policy):
         self._learn_model.reset()
         self._target_model.reset()
 
-    def _forward_learn(self, data: Dict[str, List]) -> Dict[str, Union[int, float]]:
+    def _forward_learn(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Overview:
             Forward computation graph of learn mode(updating policy).
@@ -113,14 +182,13 @@ class DQNPolicy(Policy):
             - necessary: ``obs``, ``action``, ``reward``, ``next_obs``, ``done``
             - optional: ``value_gamma``, ``IS``
         ReturnsKeys:
-            - necessary: ``cur_lr``, ``total_loss``
+            - necessary: ``cur_lr``, ``total_loss``, ``priority``
             - optional: ``action_distribution``
         """
-        # pre-process data, and stack into training batch
         data = default_preprocess_learn(
             data,
-            use_priority=False,
-            use_priority_IS_weight=False,
+            use_priority=self._priority,
+            use_priority_IS_weight=self._cfg.priority_IS_weight,
             ignore_done=self._cfg.learn.ignore_done,
             use_nstep=True
         )
@@ -132,17 +200,16 @@ class DQNPolicy(Policy):
         self._learn_model.train()
         self._target_model.train()
         # Current q value (main model)
-        q_value = self._learn_model.forward(data['obs'])['logit']
+        q_value = self._learn_model.forward(data['obs'], mode='compute_q')['logit']
         # Target q value
         with torch.no_grad():
-            target_q_value = self._target_model.forward(data['next_obs'])['logit']
+            target_q_value = self._target_model.forward(data['next_obs'], mode='compute_q')['logit']
             # Max q value action (main model)
-            target_q_action = self._learn_model.forward(data['next_obs'])['action']
+            target_q_action = self._learn_model.forward(data['next_obs'], mode='compute_q')['action']
 
         data_n = q_nstep_td_data(
             q_value, target_q_value, data['action'], target_q_action, data['reward'], data['done'], data['weight']
         )
-        # correct gamma factor for target value when episode ends
         value_gamma = data.get('value_gamma')
         loss, td_error_per_sample = q_nstep_td_error(data_n, self._gamma, nstep=self._nstep, value_gamma=value_gamma)
 
@@ -151,6 +218,8 @@ class DQNPolicy(Policy):
         # ====================
         self._optimizer.zero_grad()
         loss.backward()
+        if self._cfg.learn.multi_gpu:
+            self.sync_gradients(self._learn_model)
         self._optimizer.step()
 
         # =============
@@ -162,6 +231,9 @@ class DQNPolicy(Policy):
             'total_loss': loss.item(),
             'q_value': q_value.mean().item(),
             'target_q_value': target_q_value.mean().item(),
+            'priority': td_error_per_sample.abs().tolist(),
+            # Only discrete action satisfying len(data['action'])==1 can return this and draw histogram on tensorboard.
+            # '[histogram]action_distribution': data['action'],
         }
 
     def _monitor_vars_learn(self) -> List[str]:
@@ -203,20 +275,24 @@ class DQNPolicy(Policy):
             enable the eps_greedy_sample for exploration.
         """
         self._unroll_len = self._cfg.collect.unroll_len
+        self._gamma = self._cfg.discount_factor  # necessary for parallel
+        self._nstep = self._cfg.nstep  # necessary for parallel
         self._collect_model = model_wrap(self._model, wrapper_name='eps_greedy_sample')
         self._collect_model.reset()
 
-    def _forward_collect(self, data: Dict[int, torch.Tensor], eps: float) -> Dict[int, Dict]:
+    def _forward_collect(self, data: Dict[int, Any], eps: float) -> Dict[int, Any]:
         """
         Overview:
             Forward computation graph of collect mode(collect training data), with eps_greedy for exploration.
         Arguments:
-            - data (:obj:`Dict[str, torch.Tensor]`): Dict type obs, stacked env data for predicting policy_output(action), \
-                keys are env_id indicated by integer.
+            - data (:obj:`Dict[str, Any]`): Dict type data, stacked env data for predicting policy_output(action), \
+                values are torch.Tensor or np.ndarray or dict/list combinations, keys are env_id indicated by integer.
             - eps (:obj:`float`): epsilon value for exploration, which is decayed by collected env step.
         Returns:
-            - output (:obj:`Dict[int, Dict]`): The dict of predicting policy_output(action) for the interaction with \
+            - output (:obj:`Dict[int, Any]`): The dict of predicting policy_output(action) for the interaction with \
                 env and the constructing of transition.
+        ArgumentsKeys:
+            - necessary: ``obs``
         ReturnsKeys
             - necessary: ``logit``, ``action``
         """
@@ -226,7 +302,7 @@ class DQNPolicy(Policy):
             data = to_device(data, self._device)
         self._collect_model.eval()
         with torch.no_grad():
-            output = self._collect_model.forward(data, eps=eps)
+            output = self._collect_model.forward(data, mode='compute_q', eps=eps)
         if self._cuda:
             output = to_device(output, 'cpu')
         output = default_decollate(output)
@@ -252,14 +328,13 @@ class DQNPolicy(Policy):
         data = get_nstep_return_data(data, self._nstep, gamma=self._gamma)
         return get_train_sample(data, self._unroll_len)
 
-    def _process_transition(self, obs: torch.Tensor, policy_output: Dict[str, torch.Tensor],
-                            timestep: namedtuple) -> Dict[str, Any]:
+    def _process_transition(self, obs: Any, policy_output: Dict[str, Any], timestep: namedtuple) -> Dict[str, Any]:
         """
         Overview:
             Generate a transition(e.g.: <s, a, s', r, d>) for this algorithm training.
         Arguments:
-            - obs (:obj:`torch.Tensor`): Env observation.
-            - policy_output (:obj:`Dict[str, torch.Tensor]`): The output of policy collect mode(``self._forward_collect``),\
+            - obs (:obj:`Any`): Env observation.
+            - policy_output (:obj:`Dict[str, Any]`): The output of policy collect mode(``self._forward_collect``),\
                 including at least ``action``.
             - timestep (:obj:`namedtuple`): The output after env step(execute policy output action), including at \
                 least ``obs``, ``reward``, ``done``, (here obs indicates obs after env step).
@@ -268,8 +343,8 @@ class DQNPolicy(Policy):
         """
         transition = {
             'obs': obs,
-            'action': policy_output['action'],
             'next_obs': timestep.obs,
+            'action': policy_output['action'],
             'reward': timestep.reward,
             'done': timestep.done,
         }
@@ -283,16 +358,18 @@ class DQNPolicy(Policy):
         self._eval_model = model_wrap(self._model, wrapper_name='argmax_sample')
         self._eval_model.reset()
 
-    def _forward_eval(self, data: Dict[int, torch.Tensor]) -> Dict[int, Dict]:
+    def _forward_eval(self, data: Dict[int, Any]) -> Dict[int, Any]:
         """
         Overview:
             Forward computation graph of eval mode(evaluate policy performance), at most cases, it is similar to \
             ``self._forward_collect``.
         Arguments:
-            - obs (:obj:`Dict[str, torch.Tensor]`): Dict type obs, stacked env data for predicting policy_output(action), \
-                keys are env_id indicated by integer.
+            - data (:obj:`Dict[str, Any]`): Dict type data, stacked env data for predicting policy_output(action), \
+                values are torch.Tensor or np.ndarray or dict/list combinations, keys are env_id indicated by integer.
         Returns:
-            - output (:obj:`Dict[int, Dict]`): The dict of predicting action for the interaction with env.
+            - output (:obj:`Dict[int, Any]`): The dict of predicting action for the interaction with env.
+        ArgumentsKeys:
+            - necessary: ``obs``
         ReturnsKeys
             - necessary: ``action``
         """
@@ -302,7 +379,7 @@ class DQNPolicy(Policy):
             data = to_device(data, self._device)
         self._eval_model.eval()
         with torch.no_grad():
-            output = self._eval_model.forward(data)
+            output = self._eval_model.forward(data, mode='compute_q')
         if self._cuda:
             output = to_device(output, 'cpu')
         output = default_decollate(output)
