@@ -173,6 +173,9 @@ python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <
 4. 从tensorboard、可视化、CAM以及对特征空间的修改角度分析通关/没有通过的原因。
 
 对于有充足计算资源的同学，推荐增加实验的seed、延长实验步长到5M、更换其它游戏版本、尝试其它动作观测空间组合，使用其它的wrapper、以及free style；
+
+---
+**新增：一些实验[结果](https://github.com/opendilab/DI-adventure/blob/results/mario_dqn/README.md)供大家参考！**
 # 对于大作业任务书的一些补充说明：
 **如果不知道接下来要做什么了，请参考任务书或咨询助教！！！**
 - “3.2【baseline 跑通】（3）训练出能够通关简单级别关卡（1-1 ~~，1-2~~ ）的智能体”。 考虑到算力等因素，大家只需要关注关卡1-1即可。
