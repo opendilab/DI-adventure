@@ -48,6 +48,7 @@
 
 意思是每一秒钟，收集到的transitions（一个step一个transition）的数量。如果训练过程中发现训练速度很慢，那么可以从这里看看是否是由于收集数据过慢（这里更多的是靠CPU性能）
 
+### 1.5. 辅助信息 buffer_sec
 ![Image](https://pic4.zhimg.com/80/v2-eef36800374bc232e14a5d8ad9bec441.png)
 
 意思是每一秒钟replay buffer的增删取的情况，同理可以看看是否是由于存入和采样数据过慢（这里更多的是靠CPU和内存性能）
