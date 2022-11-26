@@ -221,7 +221,7 @@ class RecordCAM(gym.Wrapper):
                     self.close_video_recorder()
             else:
                 if not self.is_vector_env:
-                    if dones:
+                    if dones or infos['time'] < 250:
                         self.close_video_recorder()
                 elif dones[0]:
                     self.close_video_recorder()
