@@ -84,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", "-ckpt", type=str, default='./exp/v0_1a_7f_seed0/ckpt/ckpt_best.pth.tar')
     parser.add_argument("--replay_path", "-rp", type=str, default='./eval_videos')
     parser.add_argument("--version", "-v", type=int, default=0, choices=[0,1,2,3])
-    parser.add_argument("--action", "-a", type=int, default=7, choices=[2,7,14])
+    parser.add_argument("--action", "-a", type=int, default=7, choices=[2,7,12])
     parser.add_argument("--obs", "-o", type=int, default=1, choices=[1,4])
     args = parser.parse_args()
     mario_dqn_config.policy.model.obs_shape=[args.obs, 84, 84]

@@ -130,7 +130,7 @@ if __name__ == "__main__":
     # 游戏版本，v0 v1 v2 v3 四种选择
     parser.add_argument("--version", "-v", type=int, default=0, choices=[0,1,2,3])
     # 动作集合种类，包含[["right"], ["right", "A"]]、SIMPLE_MOVEMENT、COMPLEX_MOVEMENT，分别对应2、7、12个动作
-    parser.add_argument("--action", "-a", type=int, default=7, choices=[2,7,14])
+    parser.add_argument("--action", "-a", type=int, default=7, choices=[2,7,12])
     # 观测空间叠帧数目，不叠帧或叠四帧
     parser.add_argument("--obs", "-o", type=int, default=1, choices=[1,4])
     args = parser.parse_args()
