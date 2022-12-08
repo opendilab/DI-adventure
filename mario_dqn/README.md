@@ -36,6 +36,7 @@ git remote set-url origin https://github.com/opendilab/DI-adventure.git
 # clone主分支到本地
 git clone https://github.com/opendilab/DI-engine.git
 cd DI-engine
+git checkout 4c607d400d3290a27ad1e5b7fa8eeb4c2a1a4745
 pip install -e .
 ```
 - (OPTIONAL)由于DI-adventure在不断更新，如果您目前使用的是老版本的DI-adventure，可能需要通过以下方式同步更新：
@@ -43,6 +44,8 @@ pip install -e .
 # 1. 更新DI-engine
 cd DI-engine
 git pull origin main
+git checkout 4c607d400d3290a27ad1e5b7fa8eeb4c2a1a4745
+pip install -e .
 # 2. 更新DI-adventure
 cd DI-adventure
 # 确认'origin'指向远端仓库‘git@github.com:opendilab/DI-adventure.git’
@@ -185,4 +188,6 @@ python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <
 
 # Update
 ## 11.30 
-- 修复了evaluate.py以及mario_dqn_main.py中，预设动作维度不正确的bug，该bug曾经导致无法使用COMPLEX_MOVEMENT。感谢邹岷强同学提供的反馈。
+- 修复了evaluate.py以及mario_dqn_main.py中，预设动作维度不正确的bug，该bug曾经导致无法使用COMPLEX_MOVEMENT。感谢邹岷强同学的反馈。
+## 12.08
+- 修复了因为DI-engine更新导致的FinalEvalRewardEnv wrapper不可用的bug，感谢吴天鹤同学的反馈。
