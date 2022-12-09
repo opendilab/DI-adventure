@@ -191,3 +191,5 @@ python3 -u evaluate.py -ckpt <CHECKPOINT_PATH> -v <VERSION> -a <ACTION SET> -o <
 - 修复了evaluate.py以及mario_dqn_main.py中，预设动作维度不正确的bug，该bug曾经导致无法使用COMPLEX_MOVEMENT。感谢邹岷强同学的反馈。
 ## 12.08
 - 修复了因为DI-engine更新导致的FinalEvalRewardEnv wrapper不可用的bug，感谢吴天鹤同学的反馈。
+## 12.09
+- 润色了一下注释，不影响程序运行。

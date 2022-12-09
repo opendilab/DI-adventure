@@ -16,7 +16,7 @@ mario_dqn_config = dict(
         evaluator_env_num=8,
         # 评估轮次
         n_evaluator_episode=8,
-        # 训练停止的分数（这里设置了一个不可能达到的分数）
+        # 训练停止的分数（3000分可以认为通关1-1，停止训练以节省计算资源）
         stop_value=3000
     ),
     policy=dict(
