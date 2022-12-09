@@ -5,5 +5,12 @@
 |  2   |  v0             |  1 frame   | `[[right],[right, A]]`  | origin | on Server | ![v0_2a_1o](assets/v0_2a_1o.png)|![v0_2a_1o](assets/v0_2a_1o_vis.gif)|
 |  3   |  v0             |  4 frames   | `SIMPLE MOVEMENT`  | origin | on Server | ![v0_7a_4o](assets/v0_7a_4o.png)|![v0_7a_4o](assets/v0_7a_4o_vis.gif)|
 |  4   |  v0             |  4 frames   | `[[right],[right, A]]`  | origin | on Server | ![v0_2a_4o](assets/v0_2a_4o.png)|![v0_2a_4o](assets/v0_2a_4o_vis.gif)|
-|  5   |  v0             |  4 frames   | `[[right],[right, A]]`  | origin | Windows Notebook | ![v0_2a_4o_local](assets/v0_2a_4o_local.png)|![v0_2a_4o_local](assets/v0_2a_4o_local_vis.gif)|
+|  5   |  v0             |  4 frames   | `[[right],[right, A]]`  | origin | on Windows PC | ![v0_2a_4o_local](assets/v0_2a_4o_local.png)|![v0_2a_4o_local](assets/v0_2a_4o_local_vis.gif)|
 |  6   |  v1             |  4 frames   | `[[right],[right, A]]`  | origin | on Server | ![v1_2a_4o](assets/v1_2a_4o.png)|![v1_2a_4o](assets/v1_2a_4o_vis.gif)|
+|  7   |  v0             |  4 frames   | `COMPLEX MOVEMENT`  | origin | on Server | ![v0_12a_4o](assets/v0_12a_4o.png)|![v0_12a_4o](assets/v0_12a_4o_vis.gif)|
+|  8   |  v1             |  4 frames   | `COMPLEX MOVEMENT`  | origin | on Server | ![v1_12a_4o](assets/v1_12a_4o.png)|![v1_12a_4o](assets/v1_12a_4o_vis.gif)|
+|  9   |  v2             |  4 frames   | `[[right],[right, A]]`  | origin | on Server | ![v2_2a_4o](assets/v2_2a_4o.png)|![v2_2a_4o](assets/v2_2a_4o_vis.gif)|
+|  10   |  v3             |  4 frames   | `[[right],[right, A]]`  | origin | on Server | ![v3_2a_4o](assets/v3_2a_4o.png)|![v3_2a_4o](assets/v3_2a_4o_vis.gif)|
+|  11   |  v0             |  4 frames   | `[[right],[right, A]]`  | sparse | on Server | ![v0_2a_4o_sparsereward](assets/v0_2a_4o_sparsereward.png)|![v0_2a_4o_sparsereward](assets/v0_2a_4o_sparsereward_vis.gif)|
+|  12   |  v1             |  4 frames   | `[[right],[right, A]]`  | sparse | on Server | ![v1_2a_4o_sparsereward](assets/v1_2a_4o_sparsereward.png)|![v1_2a_4o_sparsereward](assets/v1_2a_4o_sparsereward_vis.gif)|
+|  13   |  v1             |  4 frames   | `[[right],[right, A]]`  | coin | on Server | ![v1_2a_4ocoinreward](assets/v1_2a_4o_coinreward.png)|![v1_2a_4o_coinreward](assets/v1_2a_4o_coinreward_vis.gif)|
